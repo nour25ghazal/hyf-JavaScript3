@@ -12,7 +12,7 @@ function fetchJSON(url) {
                 if (xhr.status < 400) {
                     resolve(xhr.response); // here return response of request (NO ERROR)
                 } else {
-                    reject(new Error(xhr.statusText)); // here return error message ( there is an ERROR)
+                     reject(new Error(`Network error: ${xhr.statusText} - ${xhr.status}`)); // here return error message ( there is an ERROR)
                 }
             }
         };
@@ -76,22 +76,23 @@ function main() {
             renderSelect(data);
         })
         .catch(error => {
-            console.log(error.message);
+            const container = document.getElementById('containers');
+            container.innerHTML = error.message;
         });
 }
 
 function renderSelect(data) {
     const select = document.getElementById('select');
 
-    for (let i = 0; i < data.length; i++) {
+    for (const repo of data) {
         createAndAppend('option', select, {
-            html: data[i].name,
-            value: data[i].url
+            html: repo.name,
+            value: repo.url
         });
     }
 
     select.addEventListener('change', function (e) {
-        repoInfo(e.target.value);
+        contributorsInfo(e.target.value);
         contrInfo(e.target.value);
 
     })
@@ -134,10 +135,10 @@ function repoInfo(data) {
 
 
 // function to fetch contr info
-function contrInfo(data) {
+function contributorsInfo(data) {
     const rightContainer = document.getElementById('rightContainer');
     rightContainer.innerHTML = '';
-    fetchJSON(data)
+    return fetchJSON(data)
         .then(data => {
             const contrUrl = data.contributors_url;
 
@@ -147,22 +148,22 @@ function contrInfo(data) {
                         id: 'ulRightContr'
                     });
 
-                    for (const k in contrUrl) {
+                    for (const contrs of contrUrl) {
 
                         const li = createAndAppend('li', ul);
 
                         createAndAppend('img', li, {
-                            src: contrUrl[k].avatar_url,
+                            src: contrs.avatar_url,
                             alt: "user's image"
                         });
 
                         createAndAppend('div', li, {
 
-                            html: "<a href=" + contrUrl[k].html_url + ' target="_blank" >' + contrUrl[k].login + "</a>"
+                            html: "<a href=" + contrs.html_url + ' target="_blank" >' + contrs.login + "</a>"
                         });
 
                         createAndAppend('div', li, {
-                            html: contrUrl[k].contributions
+                            html: contrs.contributions
 
                         });
                     };
